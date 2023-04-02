@@ -7,7 +7,15 @@ const ERR_DEFAULT = 500;
 module.exports.getUser = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(ERR_DEFAULT).send({ message: 'Ошибка!' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(ERR_BAD_REQUEST).send({ message: 'Невалидный идентификатор карточки' });
+      } else if (err.statusCode === ERR_NOT_FOUND) {
+        res.status(ERR_NOT_FOUND).send({ message: err.message });
+      } else {
+        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
 
 module.exports.getUserById = (req, res) => {
@@ -40,6 +48,7 @@ module.exports.createUser = (req, res) => {
 
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
+  console.log(req.params)
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
   .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' }))
   .then((userData) => res.send({ data: userData }))
