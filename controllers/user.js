@@ -7,17 +7,7 @@ const ERR_DEFAULT = 500;
 module.exports.getUser = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res
-          .status(ERR_BAD_REQUEST)
-          .send({ message: 'Невалидный идентификатор пользователя' });
-      } else if (err.statusCode === ERR_NOT_FOUND) {
-        res.status(ERR_NOT_FOUND).send({ message: err.message });
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
-      }
-    });
+    .catch(() => res.status(ERR_DEFAULT).send({ message: 'Ошибка!' }));
 };
 
 module.exports.getUserById = (req, res) => {
@@ -44,10 +34,6 @@ module.exports.createUser = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
-      } else if (err.name === 'CastError') {
-        res.status(ERR_BAD_REQUEST).send({
-          message: 'Переданы некорректные данные при создании пользователя',
-        });
       } else {
         res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
       }
@@ -69,10 +55,6 @@ module.exports.updateUser = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
-      } else if (err.name === 'CastError') {
-        res.status(ERR_BAD_REQUEST).send({
-          message: 'Переданы некорректные данные при создании пользователя',
-        });
       } else {
         res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
       }
@@ -93,10 +75,6 @@ module.exports.updateUserAvatar = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
-      } else if (err.name === 'CastError') {
-        res.status(ERR_BAD_REQUEST).send({
-          message: 'Переданы некорректные данные при создании пользователя',
-        });
       } else {
         res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
       }

@@ -11,12 +11,8 @@ module.exports.createCard = (req, res) => {
   Card.create({ name, link, owner })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res
-          .status(ERR_BAD_REQUEST)
-          .send({ message: 'Невалидный идентификатор карточки' });
-      } else if (err.statusCode === ERR_NOT_FOUND) {
-        res.status(ERR_NOT_FOUND).send({ message: err.message });
+      if (err.name === 'ValidationError') {
+        res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
       } else {
         res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
       }
@@ -25,6 +21,7 @@ module.exports.createCard = (req, res) => {
 
 module.exports.getCard = (req, res) => {
   Card.find({})
+    .populate('owner')
     .then((card) => res.send({ data: card }))
     .catch(() => res.status(ERR_DEFAULT).send({ message: 'Ошибка!' }));
 };
@@ -60,6 +57,7 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
+    .populate('owner')
     .orFail(() => res
       .status(ERR_NOT_FOUND)
       .send({ message: 'Карточка с таким id не найдена' }))
