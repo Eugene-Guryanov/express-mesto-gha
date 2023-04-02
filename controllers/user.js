@@ -41,27 +41,31 @@ module.exports.createUser = (req, res) => {
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' }))
-    .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
-      }
+  .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' }))
+  .then((userData) => res.send({ data: userData }))
+  .catch((err) => {
+    if (err.name === 'ValidationError') {
+      res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
+    } else if (err.name === 'CastError') {
+      res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });
+    } else {
+      res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
+    }
     });
 };
 
 module.exports.updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' }))
-    .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(ERR_BAD_REQUEST.send({ message: 'Переданы некорректные данные' }));
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
-      }
+  .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' }))
+  .then((avatarData) => res.send({ data: avatarData }))
+  .catch((err) => {
+    if (err.name === 'ValidationError') {
+      res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
+    } else if (err.name === 'CastError') {
+      res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });
+    } else {
+      res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
+    }
     });
 };

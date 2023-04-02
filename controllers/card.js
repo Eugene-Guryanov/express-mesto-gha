@@ -12,8 +12,6 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
-      } else if (err.name === 'CastError') {
         res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки' });
       } else {
         res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
@@ -52,14 +50,14 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Карточка с таким id не найдена' }))
-    .then((likes) => res.send({ data: likes }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
-      }
+  .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Карточка с таким id не найдена' }))
+  .then((likes) => res.send({ data: likes }))
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные лайка' });
+    } else {
+      res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
+    }
     });
 };
 
@@ -69,13 +67,13 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .orFail(() => res.status(ERR_NOT_FOUND).SEND({ message: 'Карточка с таким id не найдена' }))
-    .then((likes) => res.send({ data: likes }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные ' });
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
-      }
+  .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Карточка с таким id не найдена' }))
+  .then((likes) => res.send({ data: likes }))
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные дизлайка' });
+    } else {
+      res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
+    }
     });
 };
