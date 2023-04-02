@@ -9,7 +9,9 @@ module.exports.getUser = (req, res) => {
     .then((users) => res.send({ data: users }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERR_BAD_REQUEST).send({ message: 'Невалидный идентификатор карточки' });
+        res
+          .status(ERR_BAD_REQUEST)
+          .send({ message: 'Невалидный идентификатор пользователя' });
       } else if (err.statusCode === ERR_NOT_FOUND) {
         res.status(ERR_NOT_FOUND).send({ message: err.message });
       } else {
@@ -20,11 +22,15 @@ module.exports.getUser = (req, res) => {
 
 module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
-    .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' }))
+    .orFail(() => res
+      .status(ERR_NOT_FOUND)
+      .send({ message: 'Запрашиваемый пользователь не найден' }))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
+        res
+          .status(ERR_BAD_REQUEST)
+          .send({ message: 'Переданы некорректные данные' });
       } else {
         res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
       }
@@ -39,7 +45,9 @@ module.exports.createUser = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
       } else if (err.name === 'CastError') {
-        res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        res.status(ERR_BAD_REQUEST).send({
+          message: 'Переданы некорректные данные при создании пользователя',
+        });
       } else {
         res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
       }
@@ -48,33 +56,49 @@ module.exports.createUser = (req, res) => {
 
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
-  console.log(req.params)
-  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-  .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' }))
-  .then((userData) => res.send({ data: userData }))
-  .catch((err) => {
-    if (err.name === 'ValidationError') {
-      res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
-    } else if (err.name === 'CastError') {
-      res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });
-    } else {
-      res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
-    }
+  console.log(req.params);
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, about },
+    { new: true, runValidators: true },
+  )
+    .orFail(() => res
+      .status(ERR_NOT_FOUND)
+      .send({ message: 'Запрашиваемый пользователь не найден' }))
+    .then((userData) => res.send({ data: userData }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
+      } else if (err.name === 'CastError') {
+        res.status(ERR_BAD_REQUEST).send({
+          message: 'Переданы некорректные данные при создании пользователя',
+        });
+      } else {
+        res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
+      }
     });
 };
 
 module.exports.updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-  .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' }))
-  .then((avatarData) => res.send({ data: avatarData }))
-  .catch((err) => {
-    if (err.name === 'ValidationError') {
-      res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
-    } else if (err.name === 'CastError') {
-      res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });
-    } else {
-      res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
-    }
+  User.findByIdAndUpdate(
+    req.user._id,
+    { avatar },
+    { new: true, runValidators: true },
+  )
+    .orFail(() => res
+      .status(ERR_NOT_FOUND)
+      .send({ message: 'Запрашиваемый пользователь не найден' }))
+    .then((avatarData) => res.send({ data: avatarData }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
+      } else if (err.name === 'CastError') {
+        res.status(ERR_BAD_REQUEST).send({
+          message: 'Переданы некорректные данные при создании пользователя',
+        });
+      } else {
+        res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
+      }
     });
 };
