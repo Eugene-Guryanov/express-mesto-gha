@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
+const { login, createUser } = require('./routes/users');
 
 const ERR_NOT_FOUND = 404;
 
@@ -24,6 +25,9 @@ app.use((req, res, next) => {
 
 app.use(userRouter);
 app.use(cardRouter);
+app.post('/signin', login);
+app.post('/signup', createUser);
+
 app.use('*', (req, res) => {
   res.status(ERR_NOT_FOUND)
     .send({ message: 'По указоннуму url ничего нет' });
