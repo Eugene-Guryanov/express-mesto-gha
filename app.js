@@ -7,9 +7,11 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
-const { login, createUser } = require('./routes/users');
+const { loginValidation, userValidation } = require('./middlewares/validation');
+// eslint-disable-next-line import/no-unresolved, import/extensions
+const { login, createUser } = require('./controllers');
 
-const ERR_NOT_FOUND = 404;
+const NotFoundError = require('./errors/NotFoundError');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -19,12 +21,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(userRouter);
 app.use(cardRouter);
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', loginValidation, login);
+app.post('/signup', userValidation, createUser);
 
-app.use('*', (req, res) => {
-  res.status(ERR_NOT_FOUND)
-    .send({ message: 'По указоннуму url ничего нет' });
+app.use('*', (req, res, next) => {
+  next(new NotFoundError('По указаному url ничего нет'));
 });
 
 app.use((err, req, res, next) => {

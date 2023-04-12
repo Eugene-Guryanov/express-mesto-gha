@@ -3,39 +3,38 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const User = require('../models/user');
 
-const ERR_BAD_REQUEST = 400;
-const ERR_AUTH = 401;
-const ERR_NOT_FOUND = 404;
-const ERR_DEFAULT = 500;
+const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
+const ConflictError = require('../errors/ConflictError');
 
 const randomString = crypto
   .randomBytes(16) // сгенерируем случайную последовательность 16 байт (128 бит)
   .toString('hex');
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(ERR_DEFAULT).send({ message: 'Ошибка!' }));
+    .catch(next);
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.userId)
-    .orFail(() => res
-      .status(ERR_NOT_FOUND)
-      .send({ message: 'Запрашиваемый пользователь не найден' }))
-    .then((user) => res.send({ data: user }))
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь с таким id не найден');
+      }
+      res.send({ data: user });
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res
-          .status(ERR_BAD_REQUEST)
-          .send({ message: 'Переданы некорректные данные' });
+        next(new BadRequestError(err.message));
       } else {
-        res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
+        next(err);
       }
     });
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -44,60 +43,55 @@ module.exports.createUser = (req, res) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.send({ data: user }))
+    .then(() => res.send(name, about, avatar, email))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
+        next(new BadRequestError('Ошибка валидации'));
       } else if (err.code === 11000) {
-        res.status(409).send({ message: 'Данный email уже зарегестрирован!' });
+        next(new ConflictError('Данный email уже зарегистрирован!'));
       } else {
-        res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
+        next(err);
       }
     });
 };
 
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
-  console.log(req.params);
   User.findByIdAndUpdate(
     req.user._id,
     { name, about },
     { new: true, runValidators: true },
   )
-    .orFail(() => res
-      .status(ERR_NOT_FOUND)
-      .send({ message: 'Запрашиваемый пользователь не найден' }))
+    .orFail(() => next(new NotFoundError('Пользователь с таким id не найден')))
     .then((userData) => res.send({ data: userData }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
+        next(new BadRequestError('Ошибка валидации'));
       } else {
-        res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
+        next(err);
       }
     });
 };
 
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
     { avatar },
     { new: true, runValidators: true },
   )
-    .orFail(() => res
-      .status(ERR_NOT_FOUND)
-      .send({ message: 'Запрашиваемый пользователь не найден' }))
+    .orFail(() => next(new NotFoundError('Пользователь с таким id не найден')))
     .then((avatarData) => res.send({ data: avatarData }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
+        next(new BadRequestError('Ошибка валидации'));
       } else {
-        res.status(ERR_DEFAULT).send({ message: 'Ошибка!' });
+        next(err);
       }
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   User.findUserByCredentials(email, password)
     .then((user) => {
@@ -111,11 +105,7 @@ module.exports.login = (req, res) => {
       })
         .send({ message: 'Всё верно!' });
     })
-    .catch((err) => {
-      res
-        .status(ERR_AUTH)
-        .send({ message: err.message });
-    });
+    .catch(next);
 };
 
 module.exports.getMe = (req, res) => {

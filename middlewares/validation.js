@@ -1,12 +1,13 @@
 const { celebrate, Joi } = require('celebrate');
 
-module.exports.urlRegExp = /(http:\/\/|https:\/\/)(www)*[a-z0-9\-\.\_\~\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=]+#*/;
+// eslint-disable-next-line no-useless-escape
+module.exports.urlRegExp = /(http:\/\/|https:\/\/)(www)*[a-z0-9\-\.\_\~\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=]+\.(ru|com)(:\d{2,5})?((\/.+)+)?\/?#?/g;
 
 module.exports.userValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(20),
-    avatar: Joi.string(),
+    avatar: Joi.string().pattern(this.urlRegExp),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
@@ -15,7 +16,7 @@ module.exports.userValidation = celebrate({
 module.exports.cardValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required(),
+    link: Joi.string().required().pattern(this.urlRegExp),
   }),
 });
 
@@ -28,7 +29,7 @@ module.exports.userInfoValidation = celebrate({
 
 module.exports.userAvatarValidation = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string(),
+    avatar: Joi.string().pattern(this.urlRegExp),
   }),
 });
 
@@ -41,6 +42,6 @@ module.exports.loginValidation = celebrate({
 
 module.exports.idValidation = celebrate({
   params: Joi.object().keys({
-    _id: Joi.string().alphanum().length(24),
+    id: Joi.string().alphanum().length(24).hex(),
   }),
 });
