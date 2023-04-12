@@ -10,7 +10,7 @@ const cardRouter = require('./routes/cards');
 const { loginValidation, userValidation } = require('./middlewares/validation');
 // eslint-disable-next-line import/no-unresolved, import/extensions
 const { login, createUser } = require('./controllers/user');
-
+const { auth } = require('./middlewares/auth');
 const NotFoundError = require('./errors/NotFoundError');
 
 const app = express();
@@ -19,13 +19,13 @@ const { PORT = 3000 } = process.env;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(userRouter);
-app.use(cardRouter);
 app.post('/signin', loginValidation, login);
 app.post('/signup', userValidation, createUser);
+app.use('/', auth, userRouter);
+app.use('/', auth, cardRouter);
 
-app.use('*', (req, res, next) => {
-  next(new NotFoundError('По указаному url ничего нет'));
+app.use('*', () => {
+  throw new NotFoundError('По указаному url ничего нет');
 });
 
 app.use((err, req, res, next) => {
