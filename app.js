@@ -9,7 +9,7 @@ const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { loginValidation, userValidation } = require('./middlewares/validation');
 // eslint-disable-next-line import/no-unresolved, import/extensions
-const { login, createUser } = require('./controllers');
+const { login, createUser } = require('./controllers/users');
 
 const NotFoundError = require('./errors/NotFoundError');
 
