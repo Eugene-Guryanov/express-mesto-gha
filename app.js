@@ -4,7 +4,7 @@ const express = require('express');
 
 const bodyParser = require('body-parser');
 // eslint-disable-next-line import/no-unresolved
-const cookieParser = require('cookieParser');
+const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 
 const mongoose = require('mongoose');
