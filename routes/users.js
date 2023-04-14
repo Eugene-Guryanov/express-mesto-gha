@@ -10,8 +10,8 @@ const {
 
 router.get('/users', getUser);
 router.get('/users/me', getMe);
-router.get('/users/:id', idValidation, getUserById);
 router.patch('/users/me', userInfoValidation, updateUser);
+router.get('/users/:id', idValidation, getUserById);
 router.patch('/users/me/avatar', userAvatarValidation, updateUserAvatar);
 
 module.exports = router;

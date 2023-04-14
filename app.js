@@ -3,7 +3,6 @@ require('dotenv').config();
 const express = require('express');
 
 const bodyParser = require('body-parser');
-// eslint-disable-next-line import/no-unresolved
 const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 
