@@ -3,6 +3,9 @@ require('dotenv').config();
 const express = require('express');
 
 const bodyParser = require('body-parser');
+// eslint-disable-next-line import/no-unresolved
+const cookieParser = require('cookieParser');
+const { errors } = require('celebrate');
 
 const mongoose = require('mongoose');
 const userRouter = require('./routes/users');
@@ -18,15 +21,18 @@ const { PORT = 3000 } = process.env;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.post('/signin', loginValidation, login);
 app.post('/signup', userValidation, createUser);
 app.use('/', auth, userRouter);
 app.use('/', auth, cardRouter);
 
-app.use('*', () => {
+app.use('*', auth, () => {
   throw new NotFoundError('По указаному url ничего нет');
 });
+
+app.use(errors());
 
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;

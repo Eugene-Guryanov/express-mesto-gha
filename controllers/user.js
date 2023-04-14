@@ -1,15 +1,10 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 const User = require('../models/user');
 
 const BadRequestError = require('../errors/BadRequestError');
 const NotFoundError = require('../errors/NotFoundError');
 const ConflictError = require('../errors/ConflictError');
-
-const randomString = crypto
-  .randomBytes(16) // сгенерируем случайную последовательность 16 байт (128 бит)
-  .toString('hex');
 
 module.exports.getUser = (req, res, next) => {
   User.find({})
@@ -101,7 +96,7 @@ module.exports.login = (req, res, next) => {
   User.findUserByCredentials(email, password)
     .then((user) => {
       // аутентификация успешна
-      const token = jwt.sign({ _id: user._id }, randomString, { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
 
       res.cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
